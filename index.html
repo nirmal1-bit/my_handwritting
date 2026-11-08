@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assignment Maker – Realistic Handwriting Generator</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✍️</text></svg>">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/controls.css">
+    <link rel="stylesheet" href="css/page.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+<!-- ── Toolbar ── -->
+<header class="toolbar">
+    <div class="toolbar-brand">
+        <button class="btn-icon sidebar-toggle" id="sidebarToggle" title="Toggle Controls">☰</button>
+        <div class="icon">✍️</div>
+        <h1>Assignment Maker</h1>
+    </div>
+    <div class="toolbar-actions">
+        <button class="btn btn-generate" onclick="generateAssignment()">
+            📝 <span class="btn-text">Generate</span>
+        </button>
+        <button class="btn btn-download" id="downloadBtn" onclick="downloadPDF()" disabled>
+            📥 <span class="btn-text">Download PDF</span>
+        </button>
+    </div>
+</header>
+
+<!-- ── Sidebar Overlay (mobile) ── -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- ── Sidebar ── -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <!-- Presets -->
+        <div class="presets-bar">
+            <button class="preset-btn" data-preset="notebook">📓 Notebook</button>
+            <button class="preset-btn" data-preset="exam">📝 Exam</button>
+            <button class="preset-btn" data-preset="clean">🧻 Clean</button>
+            <button class="preset-btn" data-preset="vintage">📜 Vintage</button>
+        </div>
+    </div>
+
+    <div class="sidebar-scroll">
+
+        <!-- ── Text Input & Actions ── -->
+        <div class="textarea-actions">
+            <button class="action-link" id="loadSampleBtn" type="button">📋 Load Sample</button>
+            <button class="action-link" id="clearBtn" type="button">🗑️ Clear</button>
+        </div>
+        <div class="textarea-wrapper">
+            <textarea id="contentInput" placeholder="Paste your assignment content here... (Ctrl+Enter to generate)"></textarea>
+            <div class="textarea-info">
+                <span id="wordCount">0 words</span>
+                <span id="charCount">0 chars</span>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════ -->
+        <!-- SECTION: Typography -->
+        <!-- ═══════════════════════════════════ -->
+        <div class="control-section">
+            <div class="section-header">
+                <div class="section-header-left">
+                    <span class="section-icon">🔤</span>
+                    <h3>Typography</h3>
+                </div>
+                <span class="section-chevron">▼</span>
+            </div>
+            <div class="section-body">
+                <!-- Pen quick selection -->
+                <div class="control-row" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+                    <label>Pen Type</label>
+                    <div class="pen-swatches">
+                        <button class="pen-pill" data-pen="ballpoint"><span class="pen-dot" style="background:#1a1a6e"></span> Ballpoint</button>
+                        <button class="pen-pill" data-pen="gel"><span class="pen-dot" style="background:#0a1128"></span> Gel Pen</button>
+                        <button class="pen-pill" data-pen="fountain"><span class="pen-dot" style="background:#192a56"></span> Fountain</button>
+                        <button class="pen-pill" data-pen="pencil"><span class="pen-dot" style="background:#555"></span> Pencil</button>
+                        <button class="pen-pill" data-pen="red"><span class="pen-dot" style="background:#a71d2a"></span> Red Ink</button>
+                    </div>
+                </div>
+                <!-- Font Size -->
+                <div class="control-row">
+                    <label>Font Size</label>
+                    <div class="range-wrapper">
+                        <input type="range" id="fontSize" min="12" max="40" value="22" step="1" data-suffix="px">
+                        <span class="range-badge">22px</span>
+                    </div>
+                </div>
+                <!-- Letter Spacing -->
+                <div class="control-row">
+                    <label>Letter Spacing</label>
+                    <div class="range-wrapper">
+                        <input type="range" id="letterSpacing" min="-2" max="8" value="0" step="0.5" data-suffix="px">
+                        <span class="range-badge">0px</span>
+                    </div>
+                </div>
+                <!-- Word Spacing -->
+                <div class="control-row">
+                    <label>Word Spacing</label>
+                    <div class="range-wrapper">
+                        <input type="range" id="wordSpacing" min="-2" max="20" value="4" step="1" data-suffix="px">
+                        <span class="range-badge">4px</span>
+                    </div>
+                </div>
+                <!-- Ink Color -->
+                <div class="control-row">
+                    <label>Custom Ink Color</label>
+                    <div class="color-picker-wrapper">
+                        <div class="color-swatch" style="background-color: #1a1a6e;">
+                            <input type="color" id="inkColor" value="#1a1a6e">
+                        </div>
+                        <span class="color-hex">#1a1a6e</span>
+                    </div>
+                </div>
+                <!-- Ink Opacity -->
+                <div class="control-row">
+                    <label>Ink Opacity</label>
+                    <div class="range-wrapper">
+                        <input type="range" id="inkOpacity" min="0.3" max="1" value="1" step="0.05">
+                        <span class="range-badge">1</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════ -->
+        <!-- SECTION: Layout & Humanizer -->
+        <!-- ═══════════════════════════════════ -->
+        <div class="control-section">
+            <div class="section-header">
+                <div class="section-header-left">
+                    <span class="section-icon">📐</span>
+                    <h3>Layout & Realism</h3>
+                </div>
+                <span class="section-chevron">▼</span>
+            </div>
+            <div class="section-body">
+                <!-- Line Spacing -->
+                <div class="control-row">
+                    <label>Line Spacing</label>
+                    <div class="range-wrapper">
+                        <input type="range" id="lineSpacing" min="20" max="50" value="32" step="1" data-suffix="px">
+                        <span class="range-badge">32px</span>
+                    </div>
+                </div>
+                <!-- Top Margin -->
+                <div class="control-row">
+                    <label>Top Margin</label>
+                    <div class="range-wrapper">
+                        <input type="range" id="topMargin" min="40" max="120" value="80" step="2" data-suffix="px">
+                        <span class="range-badge">80px</span>
+                    </div>
+                </div>
+                <!-- Left Margin -->
+                <div class="control-row">
+                    <label>Left Margin</label>
+                    <div class="range-wrapper">
+                        <input type="range" id="leftMargin" min="50" max="130" value="88" step="2" data-suffix="px">
+                        <span class="range-badge">88px</span>
+                    </div>
+                </div>
+                <!-- Text Tilt -->
+                <div class="control-row">
+                    <label>Text Tilt (Slant)</label>
+                    <div class="range-wrapper">
+                        <input type="range" id="textTilt" min="-5" max="5" value="0" step="0.5" data-suffix="°">
+                        <span class="range-badge">0°</span>
+                    </div>
+                </div>
+                <!-- Line Jitter / Realism Humanizer -->
+                <div class="control-row">
+                    <label>Human Jitter</label>
+                    <div class="range-wrapper">
+                        <input type="range" id="lineJitter" min="0" max="2.5" value="0.5" step="0.1" data-suffix="px">
+                        <span class="range-badge">0.5px</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════ -->
+        <!-- SECTION: Paper & Lighting -->
+        <!-- ═══════════════════════════════════ -->
+        <div class="control-section">
+            <div class="section-header">
+                <div class="section-header-left">
+                    <span class="section-icon">📄</span>
+                    <h3>Paper & Lighting</h3>
+                </div>
+                <span class="section-chevron">▼</span>
+            </div>
+            <div class="section-body">
+                <!-- Paper Color -->
+                <div class="control-row">
+                    <label>Paper Color</label>
+                    <div class="color-picker-wrapper">
+                        <div class="color-swatch" style="background-color: #fdfaf5;">
+                            <input type="color" id="paperColor" value="#fdfaf5">
+                        </div>
+                        <span class="color-hex">#fdfaf5</span>
+                    </div>
+                </div>
+                <!-- Paper Texture -->
+                <div class="control-row">
+                    <label>Texture</label>
+                    <div class="control-input">
+                        <select id="paperTexture">
+                            <option value="none">None</option>
+                            <option value="grain">Subtle Grain</option>
+                            <option value="parchment">Parchment</option>
+                            <option value="clean">Clean White</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- Brightness -->
+                <div class="control-row">
+                    <label>Brightness</label>
+                    <div class="range-wrapper">
+                        <input type="range" id="brightness" min="0.5" max="1.5" value="1" step="0.05">
+                        <span class="range-badge">1</span>
+                    </div>
+                </div>
+                <!-- Contrast -->
+                <div class="control-row">
+                    <label>Contrast</label>
+                    <div class="range-wrapper">
+                        <input type="range" id="contrast" min="0.5" max="1.5" value="1" step="0.05">
+                        <span class="range-badge">1</span>
+                    </div>
+                </div>
+                <!-- Vignette / Scanner Shadow -->
+                <div class="control-row">
+                    <label>Scanner Shadow</label>
+                    <div class="range-wrapper">
+                        <input type="range" id="vignette" min="0" max="0.8" value="0" step="0.05">
+                        <span class="range-badge">0</span>
+                    </div>
+                </div>
+                <!-- Page Border Radius -->
+                <div class="control-row">
+                    <label>Border Radius</label>
+                    <div class="range-wrapper">
+                        <input type="range" id="pageBorderRadius" min="0" max="12" value="0" step="1" data-suffix="px">
+                        <span class="range-badge">0px</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════ -->
+        <!-- SECTION: Lines & Margins -->
+        <!-- ═══════════════════════════════════ -->
+        <div class="control-section">
+            <div class="section-header">
+                <div class="section-header-left">
+                    <span class="section-icon">📏</span>
+                    <h3>Lines & Margins</h3>
+                </div>
+                <span class="section-chevron">▼</span>
+            </div>
+            <div class="section-body">
+                <!-- Show Margin Lines -->
+                <div class="control-row">
+                    <label>Margin Lines</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="showMarginLines" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <!-- Margin Line Color -->
+                <div class="control-row">
+                    <label>Margin Color</label>
+                    <div class="color-picker-wrapper">
+                        <div class="color-swatch" style="background-color: #dc5050;">
+                            <input type="color" id="marginLineColor" value="#dc5050">
+                        </div>
+                        <span class="color-hex">#dc5050</span>
+                    </div>
+                </div>
+                <!-- Show Ruled Lines -->
+                <div class="control-row">
+                    <label>Ruled Lines</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="showRuledLines" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <!-- Ruled Line Color -->
+                <div class="control-row">
+                    <label>Line Color</label>
+                    <div class="color-picker-wrapper">
+                        <div class="color-swatch" style="background-color: #96a0af;">
+                            <input type="color" id="lineColor" value="#96a0af">
+                        </div>
+                        <span class="color-hex">#96a0af</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════ -->
+        <!-- SECTION: Header & Details -->
+        <!-- ═══════════════════════════════════ -->
+        <div class="control-section">
+            <div class="section-header">
+                <div class="section-header-left">
+                    <span class="section-icon">🏷️</span>
+                    <h3>Header & Details</h3>
+                </div>
+                <span class="section-chevron">▼</span>
+            </div>
+            <div class="section-body">
+                <!-- Header Style -->
+                <div class="control-row">
+                    <label>Header Style</label>
+                    <div class="control-input">
+                        <select id="headerStyle">
+                            <option value="datepage">Date / Page Box</option>
+                            <option value="dateonly">Date Only</option>
+                            <option value="none">None</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- Date text -->
+                <div class="control-row">
+                    <label>Date Text</label>
+                    <div class="control-input">
+                        <input type="text" id="dateText" placeholder="e.g. 12/04/2026">
+                    </div>
+                </div>
+                <!-- Title -->
+                <div class="control-row">
+                    <label>Title</label>
+                    <div class="control-input">
+                        <input type="text" id="titleText" placeholder="e.g. Neural Networks">
+                    </div>
+                </div>
+                <!-- Show Page Number -->
+                <div class="control-row">
+                    <label>Page Number</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="showPageNumber" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="sidebar-footer">
+        Made with <span>❤️</span> by Assignment Maker
+    </div>
+</aside>
+
+<!-- ── Preview Panel ── -->
+<main class="preview-panel">
+    <!-- Zoom & Fit preview toolbar -->
+    <div class="preview-toolbar">
+        <div class="preview-header" style="margin-bottom: 0;">Preview</div>
+        <div class="zoom-controls">
+            <button class="zoom-btn" id="zoomOutBtn" title="Zoom Out">−</button>
+            <span class="zoom-label" id="zoomLabel">100%</span>
+            <button class="zoom-btn" id="zoomInBtn" title="Zoom In">+</button>
+            <button class="zoom-btn" id="zoomFitBtn" title="Fit to Screen">Fit</button>
+        </div>
+    </div>
+
+    <div id="pagesContainer">
+        <div class="empty-preview">
+            <div class="empty-icon">📝</div>
+            <p>Paste your content in the text area or click <strong>Load Sample</strong> and hit <strong>Generate</strong> to see your handwritten pages.</p>
+        </div>
+    </div>
+    <div class="footer">Made with <span>❤️</span> by Assignment Maker</div>
+</main>
+
+<!-- ── Loading Overlay ── -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner">
+        <div class="spinner"></div>
+        <p>Generating PDF…</p>
+    </div>
+</div>
+
+<!-- ── Toast Container ── -->
+<div class="toast-container"></div>
+
+<!-- ── Scripts ── -->
+<script src="js/utils.js"></script>
+<script src="js/controls.js"></script>
+<script src="js/generator.js"></script>
+<script src="js/pdf.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>

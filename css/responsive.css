@@ -1,0 +1,88 @@
+/* ── Responsive Styles ── */
+
+@media (max-width: 1024px) {
+    .preview-panel {
+        margin-left: 0;
+        padding: 70px 16px 30px;
+    }
+
+    .sidebar {
+        transform: translateX(-100%);
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+        box-shadow: 4px 0 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .sidebar-toggle {
+        display: flex;
+    }
+
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 49;
+    }
+
+    .sidebar-overlay.active {
+        display: block;
+    }
+
+    #pagesContainer {
+        max-width: 100%;
+    }
+
+    .toolbar-brand h1 {
+        font-size: 1rem;
+    }
+
+    .btn span.btn-text {
+        display: none;
+    }
+}
+
+@media (max-width: 600px) {
+    .toolbar {
+        padding: 0 12px;
+    }
+
+    .toolbar-actions {
+        gap: 6px;
+    }
+
+    .btn {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+    }
+
+    .sidebar {
+        width: 100%;
+    }
+
+    .sidebar-scroll {
+        padding: 8px 14px 14px;
+    }
+
+    .presets-bar {
+        gap: 6px;
+    }
+
+    .textarea-wrapper textarea {
+        height: 140px;
+    }
+
+    .range-wrapper input[type="range"] {
+        width: 90px;
+    }
+
+    .preview-toolbar {
+        flex-direction: column;
+        gap: 8px;
+    }
+}
